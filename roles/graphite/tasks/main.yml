@@ -1,0 +1,67 @@
+---
+# ---------------------
+# Graphite dependencies
+# ---------------------
+
+- name: "Install dependencies (apt)"
+  apt: pkg={{ item }} state=present update_cache=yes
+  with_items: [ fontconfig, python-cairo-dev, python-dev, python-pip, libffi-dev ]
+
+# -----------------
+# Graphite packages
+# -----------------
+
+- name: "Install virtualenv"
+  pip: name=virtualenv
+
+- name: "Create the virtualenv directory"
+  file: "path={{ graphite_install_dir }} state=directory mode=0755 owner=vagrant group=vagrant"
+
+- name: "Install Graphite (pip)"
+  sudo: no
+  environment:
+    PYTHONPATH: "{{ graphite_install_dir }}/lib:{{ graphite_install_dir }}/webapp"
+  pip: "name={{ item }} virtualenv={{ graphite_install_dir }} state=present chdir={{ graphite_install_dir }}"
+  with_items:
+    - 'https://github.com/graphite-project/ceres/tarball/master'
+    - whisper
+    - carbon
+    - 'django==1.7'
+    - django-tagging
+    - pytz
+    - cairocffi
+    - 'graphite-web'
+
+# ----------------------
+# Database Configuration
+# ----------------------
+
+- name: "Install virtualenv exec template"
+  sudo: no
+  template: src=venv_exec.j2 dest={{ graphite_install_dir }}/venv_exec mode=755
+
+# for one reason or another, this directive is needed to properly fit all files
+# into their respective locations. go figure.
+- name: "Copy lingering files"
+  sudo: no
+  shell: "cp -r {{ graphite_install_dir }}/lib/python2.7/site-packages/opt/* {{ graphite_install_dir }}/"
+
+- name: "Copy local_settings.py"
+  sudo: no
+  template: src=graphite.local_settings.py.j2 dest={{ graphite_install_dir }}/webapp/graphite/local_settings.py mode=755
+
+- name: "Create the storage directory"
+  sudo: no
+  file: "path={{ graphite_install_dir }}/storage state=directory mode=0755 owner=vagrant group=vagrant"
+
+- name: "Create the log directory"
+  sudo: no
+  file: "path={{ graphite_install_dir }}/storage/log/webapp/ state=directory mode=0755 owner=vagrant group=vagrant"
+
+- name: "Set up the SQLite database"
+  sudo: no
+  shell: "PYTHONPATH={{ graphite_install_dir }}/webapp {{ graphite_install_dir }}/venv_exec {{ graphite_install_dir }}/bin/django-admin.py syncdb --settings=graphite.settings --noinput"
+
+- name: "Copy the wsgi file"
+  sudo: no
+  shell: "cp -r {{ graphite_install_dir }}/conf/graphite.wsgi.example {{ graphite_install_dir }}/webapp/graphite/wsgi.py"

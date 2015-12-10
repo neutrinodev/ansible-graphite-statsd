@@ -1,0 +1,83 @@
+---
+graphite_install_dir: /opt/graphite
+graphite_hostname: graphite.lh
+
+statsd_version: "v0.7.2"
+statsd_install_dir: "/opt/statsd"
+statsd_user: statsd
+statsd_graphite_port: 2003
+statsd_graphite_host: localhost
+statsd_port: 8215
+statsd_mgmt_port: 8216
+statsd_mgmt_address: "127.0.0.1"
+statsd_config_file: "/opt/statsd/config.js"
+
+uwsgi_virtualenv_path: "{{ graphite_install_dir }}"
+uwsgi_num_processes: 4
+uwsgi_user: vagrant
+uwsgi_app_module: "graphite.wsgi:application"
+uwsgi_app_path: "{{ graphite_install_dir }}/webapp"
+uwsgi_app_name: graphite
+uwsgi_app_port: 5000
+uwsgi_app_env: PRODUCTION_MODE=true DJANGO_SETTINGS_MODULE=graphite.settings
+
+nginx_user: "www-data"
+nginx_sites:
+  graphite:
+    - listen 80
+    - server_name {{ graphite_hostname }}
+    - gzip on
+    - gzip_disable msie6
+    - gzip_types text/plain application/x-javascript text/xml text/css
+    - location / {
+        include uwsgi_params;
+        uwsgi_pass 127.0.0.1:{{ uwsgi_app_port }};
+      }
+    - location /graphite {
+        include uwsgi_params;
+        uwsgi_pass 127.0.0.1:{{ uwsgi_app_port }};
+      }
+    - location /media  {
+        alias {{ uwsgi_app_path }}/media;
+      }
+    - location /static {
+        alias {{ uwsgi_app_path }}/static;
+      }
+    - location /content {
+        alias /opt/graphite/webapp/graphite/content;
+        include uwsgi_params;
+        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
+      }
+    - location /metrics {
+        alias /opt/graphite/webapp/graphite/metrics;
+        include uwsgi_params;
+        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
+      }
+    - location /dashboard {
+        alias /opt/graphite/webapp/graphite/dashboard;
+        include uwsgi_params;
+        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
+      }
+    - location /render {
+        alias /opt/graphite/webapp/graphite/render;
+        include uwsgi_params;
+        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
+      }
+    - location /browser {
+        alias /opt/graphite/webapp/graphite/browser;
+        include uwsgi_params;
+        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
+      }
+    - location /composer {
+        alias /opt/graphite/webapp/graphite/composer;
+        include uwsgi_params;
+        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
+      }
+
+nginx_configs:
+  proxy:
+    - proxy_set_header X-Real-IP  $remote_addr
+    - proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for
+  gzip:
+    - gzip on
+    - gzip_disable msie6

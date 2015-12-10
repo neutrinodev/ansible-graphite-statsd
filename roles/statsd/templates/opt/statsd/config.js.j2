@@ -1,0 +1,8 @@
+{
+  graphitePort: {{ statsd_graphite_port }}
+, graphiteHost: "{{ statsd_graphite_host }}"
+, port: {{ statsd_port }}
+, mgmt_port: {{ statsd_mgmt_port }}
+, mgmt_address: "{{ statsd_mgmt_address }}"
+, backends: [ "./backends/graphite" ]
+}

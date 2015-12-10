@@ -1,0 +1,37 @@
+---
+- name: "Install dependencies"
+  apt: "name={{ item }} update_cache=yes state=present"
+  with_items:
+    - nodejs
+    - git
+  tags: statsd
+
+- name: Create statsd user
+  user: "name={{ statsd_user }} state=present shell=/bin/false system=yes"
+  tags: statsd
+
+- name: Create log directory
+  file: "path=/var/log/statsd owner={{ statsd_user }} group={{ statsd_user }} state=directory"
+  tags: statsd
+
+- name: Install statsd from GitHub
+  git: "repo=https://github.com/etsy/statsd.git dest={{ statsd_install_dir }} update=no version={{ statsd_version }}"
+  tags: statsd
+
+- name: Get directory permissions
+  stat: "path={{ statsd_install_dir }}"
+  register: permissions
+  tags: statsd
+
+- name: Set file permissions
+  command: "/bin/chown -R statsd:statsd {{ statsd_install_dir }}"
+  when: "permissions.stat.pw_name != '{{ statsd_user }}'"
+  tags: statsd
+
+- name: Copy configuration
+  template: "src=opt/statsd/config.js.j2 dest={{ statsd_config_file }} mode=755 owner={{ statsd_user }} group={{ statsd_user }}"
+  tags: statsd
+
+- name: Copy upstart script
+  template: "src=etc/init/statsd.conf.j2 dest=/etc/init/statsd.conf"
+  tags: statsd

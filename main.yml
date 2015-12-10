@@ -1,0 +1,14 @@
+---
+- hosts: graphite
+  user: vagrant
+  sudo: yes
+
+  roles:
+    - graphite
+    - graphite_firewall
+    - statsd
+    - uwsgi_upstart
+    - jdauphant.nginx
+
+  vars_files:
+    - vars/graphite.yml
