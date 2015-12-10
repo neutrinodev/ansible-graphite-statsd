@@ -1,0 +1,10 @@
+---
+statsd_version: "v0.7.2"
+statsd_install_dir: "/opt/statsd"
+statsd_user: statsd
+statsd_graphite_port: 2003
+statsd_graphite_host: localhost
+statsd_port: 8215
+statsd_mgmt_port: 8216
+statsd_mgmt_address: "127.0.0.1"
+statsd_config_file: "/opt/statsd/config.js"

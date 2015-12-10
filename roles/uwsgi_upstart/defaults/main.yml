@@ -1,0 +1,9 @@
+---
+uwsgi_virtualenv_path: "/opt/graphite"
+uwsgi_num_processes: 4
+uwsgi_user: vagrant
+uwsgi_app_module: "graphite.wsgi:application"
+uwsgi_app_path: "/opt/graphite/webapp"
+uwsgi_app_name: graphite
+uwsgi_app_port: 5000
+uwsgi_app_env: PRODUCTION_MODE=true DJANGO_SETTINGS_MODULE=graphite.settings
