@@ -11,46 +11,6 @@ nginx_sites:
         include uwsgi_params;
         uwsgi_pass 127.0.0.1:{{ uwsgi_app_port }};
       }
-    - location /graphite {
-        include uwsgi_params;
-        uwsgi_pass 127.0.0.1:{{ uwsgi_app_port }};
-      }
-    - location /media  {
-        alias {{ uwsgi_app_path }}/media;
-      }
-    - location /static {
-        alias {{ uwsgi_app_path }}/static;
-      }
-    - location /content {
-        alias /opt/graphite/webapp/graphite/content;
-        include uwsgi_params;
-        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
-      }
-    - location /metrics {
-        alias /opt/graphite/webapp/graphite/metrics;
-        include uwsgi_params;
-        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
-      }
-    - location /dashboard {
-        alias /opt/graphite/webapp/graphite/dashboard;
-        include uwsgi_params;
-        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
-      }
-    - location /render {
-        alias /opt/graphite/webapp/graphite/render;
-        include uwsgi_params;
-        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
-      }
-    - location /browser {
-        alias /opt/graphite/webapp/graphite/browser;
-        include uwsgi_params;
-        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
-      }
-    - location /composer {
-        alias /opt/graphite/webapp/graphite/composer;
-        include uwsgi_params;
-        uwsgi_pass      127.0.0.1:{{ uwsgi_app_port }};
-      }
 
 nginx_configs:
   proxy:
